@@ -2,6 +2,7 @@
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace MongoDB {
 	public class repo {
@@ -23,6 +24,10 @@ namespace MongoDB {
 		public void WriteMonkeyRecords(List<DBMonkeyRecord> monkeyRecords) {
 			var collection = mongoDatabase.GetCollection<DBMonkeyRecord>("MonkeyRecords");
 			collection.InsertMany(monkeyRecords);
+
+			List<Log> logs = monkeyRecords.Select(monkey => new Log(monkey.woodID, monkey.monkeyID, $"{monkey.monkeyName} is now in tree {monkey.treeID} at location ({monkey.x}, {monkey.y})")).ToList();
+			var collectionLogs = mongoDatabase.GetCollection<dynamic>("Logs");
+			collectionLogs.InsertMany(logs);
 		}
 	}
 }

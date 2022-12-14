@@ -12,21 +12,12 @@ namespace EscapeFromTheWoods {
 	public class Wood {
 		private const int drawingFactor = 8;
 		private string path;
-		//private DBwriter db
 		private repo db;
 		private Random r = new Random(1);
 		public int woodID { get; set; }
 		public Dictionary<int, Tree> trees { get; set; }
 		public List<Monkey> monkeys { get; private set; }
 		private Map map;
-		//public Wood(int woodID, List<Tree> trees, Map map, string path, DBwriter db) {
-		//	this.woodID = woodID;
-		//	this.trees = trees;
-		//	this.monkeys = new List<Monkey>();
-		//	this.map = map;
-		//	this.path = path;
-		//	this.db = db;
-		//}
 
 		public Wood(int woodID, Dictionary<int, Tree> trees, Map map, string path, repo db) {
 			this.woodID = woodID;
@@ -48,9 +39,7 @@ namespace EscapeFromTheWoods {
 		}
 		public void Escape() {
 			List<List<Tree>> routes = new List<List<Tree>>();
-			int count = 0;
 			foreach (Monkey monkey in monkeys) {
-				Console.WriteLine(++count);
 				routes.Add(EscapeMonkey(monkey));
 			}
 			WriteEscaperoutesToBitmap(routes);
@@ -86,7 +75,6 @@ namespace EscapeFromTheWoods {
 			tasks.Add(Task.Run(() => {
 				var g2 = Graphics.FromImage(bm);
 				foreach (Tree t in trees.Values) {
-					//g2.FillEllipse(b, t.x * drawingFactor, t.y * drawingFactor, drawingFactor, drawingFactor)
 					g2.DrawEllipse(p, t.x * drawingFactor, t.y * drawingFactor, drawingFactor, drawingFactor);
 				}
 			}));
@@ -198,13 +186,13 @@ namespace EscapeFromTheWoods {
 				double distanceToBorder = (new List<double>(){ map.ymax - monkey.tree.y,
 				map.xmax - monkey.tree.x,monkey.tree.y-map.ymin,monkey.tree.x-map.xmin }).Min();
 				if (distanceToMonkey.Count == 0) {
-					//WriteRouteToDB(monkey, route)
+					WriteRouteToDB(monkey, route);
 					Console.ForegroundColor = ConsoleColor.White;
 					Console.WriteLine($"{woodID}:end {woodID},{monkey.name}");
 					return route;
 				}
 				if (distanceToBorder < distanceToMonkey.First().Key) {
-					//WriteRouteToDB(monkey, route)
+					WriteRouteToDB(monkey, route);
 					Console.ForegroundColor = ConsoleColor.White;
 					Console.WriteLine($"{woodID}:end {woodID},{monkey.name}");
 					return route;
