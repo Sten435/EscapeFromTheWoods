@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MongoDB;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -6,18 +7,19 @@ namespace EscapeFromTheWoods
 {
     public static class WoodBuilder
     {        
-        public static Wood GetWood(int size,Map map,string path,DBwriter db)
+        public static Wood GetWood(int aantalTrees, Map map,string path, repo db)
         {
-            Random r = new Random(100);
-            List<Tree> trees = new List<Tree>();
-            int n = 0;
-            while(n<size)
-            {
-                Tree t = new Tree(IDgenerator.GetTreeID(),r.Next(map.xmin,map.xmax),r.Next(map.ymin,map.ymax));
-                if (!trees.Contains(t)) { trees.Add(t); n++; }
-            }
-            Wood w = new Wood(IDgenerator.GetWoodID(),trees,map,path,db);
-            return w;
-        }
+			Random r = new Random(100);
+			Dictionary<int, Tree> trees = new Dictionary<int, Tree>();
+			int count = 1;
+
+			while (count <= aantalTrees) {
+				Tree tree = new Tree(count, r.Next(map.xmin, map.xmax), r.Next(map.ymin, map.ymax));
+				if (!trees.ContainsKey(tree.treeID)) { trees.Add(tree.treeID, tree); count++; }
+			}
+
+			Wood w = new Wood(IDgenerator.GetWoodID(), trees, map, path, db);
+			return w;
+		}
     }
 }
