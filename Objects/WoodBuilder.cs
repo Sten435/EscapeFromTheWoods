@@ -11,12 +11,12 @@ namespace EscapeFromTheWoods
         public static Wood GetWood(int aantalTrees, Map map,string path, Repo db)
         {
 			Random r = new Random(100);
-			Dictionary<int, Tree> trees = new Dictionary<int, Tree>();
+			Dictionary<(int, int), Tree> trees = new Dictionary<(int, int), Tree>();
 			int count = 0;
 
 			while (count < aantalTrees) {
 				Tree tree = new Tree(count, r.Next(map.xmin, map.xmax), r.Next(map.ymin, map.ymax));
-				if (!trees.ContainsKey(tree.treeID)) { trees.Add(tree.treeID, tree); count++; }
+				if (!trees.ContainsKey((tree.x, tree.y))) { trees.Add((tree.x, tree.y), tree); count++; }
 			}
 
 			Wood w = new Wood(IDgenerator.GetWoodID(), trees.Values.ToList(), map, path, db);

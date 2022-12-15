@@ -14,10 +14,12 @@ namespace EscapeFromTheWoods {
 		private string path;
 		private Repo db;
 		private Random r = new Random(1);
+		private Map map;
+		private Dictionary<int, HashSet<int>> apenPaden = new();
+
 		public int woodID { get; set; }
 		public List<Tree> trees { get; set; }
 		public List<Monkey> monkeys { get; private set; }
-		private Map map;
 
 		public Wood(int woodID, List<Tree> trees, Map map, string path, Repo db) {
 			this.woodID = woodID;
@@ -58,22 +60,22 @@ namespace EscapeFromTheWoods {
 
 			Console.WriteLine($"{woodID}:write bitmap routes {woodID} start");
 
-			Color[] cvalues = new Color[] { Color.DarkRed, Color.Black, Color.DarkBlue, Color.DarkMagenta, Color.DarkViolet };
+			Color[] cvalues = new Color[] { Color.DarkRed, Color.Black, Color.DarkBlue, Color.Cyan, Color.DarkViolet };
 
 			var width = (map.xmax - map.xmin) * drawingFactor;
 			var height = (map.ymax - map.ymin) * drawingFactor;
 
 			Bitmap bm = new Bitmap(width, height);
 			Graphics g = Graphics.FromImage(bm);
+			Graphics g2 = Graphics.FromImage(bm);
 
 			int delta = drawingFactor / 2;
 
 			Brush b = Brushes.DarkGreen;
 			Pen p = Pens.DarkGreen;
-			g.FillRectangle(Brushes.White, 0, 0, width, height);
+			g.FillRectangle(Brushes.WhiteSmoke, 0, 0, width, height);
 
 			tasks.Add(Task.Run(() => {
-				var g2 = Graphics.FromImage(bm);
 				foreach (Tree t in trees) {
 					g2.DrawEllipse(p, t.x * drawingFactor, t.y * drawingFactor, drawingFactor, drawingFactor);
 				}
@@ -110,13 +112,6 @@ namespace EscapeFromTheWoods {
 			Console.ForegroundColor = ConsoleColor.Yellow;
 			Console.WriteLine($"{woodID}:write bitmap routes {woodID} end");
 		}
-		public IEnumerable<IEnumerable<T>> ChunkBy<T>(IEnumerable<T> source, int chunkSize) {
-			while (source.Any()) {
-				var chunk = source.Take(chunkSize);
-				yield return chunk;
-				source = source.Skip(chunkSize);
-			}
-		}
 		public async void WriteWoodToDB() {
 			Console.ForegroundColor = ConsoleColor.Green;
 			Console.WriteLine($"{woodID}:write db wood {woodID} start");
@@ -134,15 +129,20 @@ namespace EscapeFromTheWoods {
 			Dictionary<int, bool> visited = new Dictionary<int, bool>();
 			List<Tree> route = new List<Tree>() { monkey.tree };
 
-			foreach (var tree in trees) {
-				visited.Add(tree.treeID, false);
+			for (int i = 0; i < trees.Count; i++) {
+				visited.Add(trees[i].treeID, false);
 			}
 
 			do {
+				if (!apenPaden.ContainsKey(route.Count)) {
+					apenPaden.Add(route.Count, new HashSet<int>());
+				}
+				apenPaden[route.Count].Add(monkey.tree.treeID);
+
 				visited[monkey.tree.treeID] = true;
 				SortedList<double, List<Tree>> distanceToMonkey = new SortedList<double, List<Tree>>();
 
-				int radius = (trees.Count / map.xmax) + (trees.Count / map.ymax);
+				int radius = map.xmax * map.ymax / trees.Count;
 				int multiplier = 1;
 
 				List<Tree> filteredTrees;
@@ -151,8 +151,8 @@ namespace EscapeFromTheWoods {
 					//zoek dichtste boom die nog niet is bezocht
 					int searchRect = radius * multiplier;
 					filteredTrees = trees.Where((tree) => {
-						if (visited[tree.treeID] || tree.hasMonkey) return false;
-						
+						if (visited[tree.treeID] || tree.hasMonkey || apenPaden[route.Count].Contains(tree.treeID)) return false;
+
 						int lBound = monkey.tree.x - searchRect;
 						int rBound = monkey.tree.x + searchRect;
 
@@ -174,35 +174,58 @@ namespace EscapeFromTheWoods {
 				} while (true);
 
 
-				foreach (Tree tree in filteredTrees) {
-					double distance = Math.Sqrt(Math.Pow(tree.x - monkey.tree.x, 2) + Math.Pow(tree.y - monkey.tree.y, 2));
-					if (distanceToMonkey.ContainsKey(distance)) {
-						distanceToMonkey[distance].Add(tree);
+				foreach (Tree t in filteredTrees) {
+					double distances = Math.Sqrt(Math.Pow(t.x - monkey.tree.x, 2) + Math.Pow(t.y - monkey.tree.y, 2));
+					if (distanceToMonkey.ContainsKey(distances)) {
+						distanceToMonkey[distances].Add(t);
 					} else {
-						distanceToMonkey.Add(distance, new List<Tree>() { tree });
+						distanceToMonkey.Add(distances, new List<Tree>() { t });
 					}
 				}
 
 
 				//distance to border            
 				//noord oost zuid west
-				double distanceToBorder = (new List<double>(){ map.ymax - monkey.tree.y,
-				map.xmax - monkey.tree.x,monkey.tree.y-map.ymin,monkey.tree.x-map.xmin }).Min();
+				double distanceToBorder = (new List<double>() { map.ymax - monkey.tree.y, map.xmax - monkey.tree.x, monkey.tree.y - map.ymin, monkey.tree.x - map.xmin }).Min();
 				if (distanceToMonkey.Count == 0) {
 					WriteRouteToDB(monkey, route);
 					Console.ForegroundColor = ConsoleColor.White;
 					Console.WriteLine($"{woodID}:end {woodID},{monkey.name}");
 					return route;
 				}
-				if (distanceToBorder < distanceToMonkey.First().Key) {
+				if (distanceToBorder <= distanceToMonkey.First().Key) {
 					WriteRouteToDB(monkey, route);
 					Console.ForegroundColor = ConsoleColor.White;
 					Console.WriteLine($"{woodID}:end {woodID},{monkey.name}");
 					return route;
 				}
 
-				route.Add(distanceToMonkey.First().Value.First());
-				monkey.tree = distanceToMonkey.First().Value.First();
+				Tree dichtesteTree = null;
+				int distance = int.MaxValue;
+
+				int maxBorderX = map.xmax;
+				int minBorderX = map.xmin;
+
+				int maxBorderY = map.ymax;
+				int minBorderY = map.ymin;
+				
+				foreach (Tree tree in distanceToMonkey.First().Value) {
+
+					int distanceToRightBorder = maxBorderX - tree.x;
+					int distanceToLeftBorder = tree.x - minBorderX;
+					int distanceToTopBorder = maxBorderY - tree.y;
+					int distanceToBottomBorder = tree.y - minBorderY;
+
+					int minDistance = (new List<int>() { distanceToRightBorder, distanceToLeftBorder, distanceToTopBorder, distanceToBottomBorder }).Min();
+
+					if (dichtesteTree == null || minDistance <= distance) {
+						dichtesteTree = tree;
+						distance = minDistance;
+					}
+				}
+
+				route.Add(dichtesteTree);
+				monkey.tree = dichtesteTree;
 			}
 			while (true);
 		}

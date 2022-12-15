@@ -19,7 +19,7 @@ namespace EscapeFromTheWoods {
 
 			string path = @"C:\Users\stanp\Desktop\monkeys";
 			Map m1 = new Map(0, 500, 0, 500);
-			Wood w1 = WoodBuilder.GetWood(500, m1, path, db);
+			Wood w1 = WoodBuilder.GetWood(250000, m1, path, db);
 			w1.PlaceMonkey("Alice", IDgenerator.GetMonkeyID());
 			w1.PlaceMonkey("Janice", IDgenerator.GetMonkeyID());
 			w1.PlaceMonkey("Toby", IDgenerator.GetMonkeyID());
