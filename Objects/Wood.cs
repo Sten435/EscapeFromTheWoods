@@ -138,38 +138,38 @@ namespace EscapeFromTheWoods {
 				visited.Add(tree.Value.treeID, false);
 			}
 
-			int chunckSize = 150;
+			//int chunckSize = 150;
 
-			if (trees.Count <= 150) {
-				while (trees.Count <= chunckSize) {
-					chunckSize -= 10;
-				}
-			}
+			//if (trees.Count <= 150) {
+			//	while (trees.Count <= chunckSize) {
+			//		chunckSize -= 10;
+			//	}
+			//}
 
-			var dictionary = ChunkBy(trees.Values.ToList().OrderBy(tree => tree.x).ThenBy(tree => tree.y).ToList(), chunckSize)
-				.ToDictionary(tree => (tree.Last().x, tree.Last().y
-				));
+			//var dictionary = ChunkBy(trees.Values.ToList().OrderBy(tree => tree.x).ThenBy(tree => tree.y).ToList(), chunckSize)
+			//	.ToDictionary(tree => (tree.Last().x, tree.Last().y
+			//	));
 
 			do {
 				visited[monkey.tree.treeID] = true;
 				SortedList<double, List<Tree>> distanceToMonkey = new SortedList<double, List<Tree>>();
 
-				int monkeyX = monkey.tree.x;
-				int monkeyY = monkey.tree.y;
+				//int monkeyX = monkey.tree.x;
+				//int monkeyY = monkey.tree.y
 
-				double closestDistance = double.PositiveInfinity;
-				List<Tree> chunck = null;
+				//double closestDistance = double.PositiveInfinity;
+				//List<Tree> chunck = null;
 
-				foreach (var entry in dictionary) {
-					double distance = Math.Sqrt(Math.Pow(monkeyX - entry.Key.Item1, 2) + Math.Pow(monkeyY - entry.Key.Item2, 2));
-					if (distance < closestDistance) {
-						closestDistance = distance;
-						chunck = entry.Value.ToList();
-					}
-				}
+				//foreach (var entry in dictionary) {
+				//	double distance = Math.Sqrt(Math.Pow(monkeyX - entry.Key.Item1, 2) + Math.Pow(monkeyY - entry.Key.Item2, 2));
+				//	if (distance < closestDistance) {
+				//		closestDistance = distance;
+				//		chunck = entry.Value.ToList();
+				//	}
+				//}
 
 				//zoek dichtste boom die nog niet is bezocht
-				foreach (Tree tree in chunck) {
+				foreach (Tree tree in trees.Values) {
 					if ((!visited[tree.treeID]) && (!tree.hasMonkey)) {
 						double distance = Math.Sqrt(Math.Pow(tree.x - monkey.tree.x, 2) + Math.Pow(tree.y - monkey.tree.y, 2));
 						if (distanceToMonkey.ContainsKey(distance)) {
