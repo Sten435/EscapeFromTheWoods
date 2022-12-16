@@ -19,36 +19,36 @@ namespace EscapeFromTheWoods {
 
 			string path = @"C:\Users\stanp\Desktop\monkeys";
 			Map m1 = new Map(0, 500, 0, 500);
-			Wood w1 = WoodBuilder.GetWood(250000, m1, path, db);
+			Wood w1 = WoodBuilder.GetWood(5000, m1, path, db);
 			w1.PlaceMonkey("Alice", IDgenerator.GetMonkeyID());
 			w1.PlaceMonkey("Janice", IDgenerator.GetMonkeyID());
 			w1.PlaceMonkey("Toby", IDgenerator.GetMonkeyID());
 			w1.PlaceMonkey("Mindy", IDgenerator.GetMonkeyID());
 			w1.PlaceMonkey("Jos", IDgenerator.GetMonkeyID());
 
-			//Map m2 = new Map(0, 200, 0, 400);
-			//Wood w2 = WoodBuilder.GetWood(5, m2, path, db);
-			//w2.PlaceMonkey("Tom", IDgenerator.GetMonkeyID());
-			//w2.PlaceMonkey("Jerry", IDgenerator.GetMonkeyID());
-			//w2.PlaceMonkey("Tiffany", IDgenerator.GetMonkeyID());
-			//w2.PlaceMonkey("Mozes", IDgenerator.GetMonkeyID());
-			//w2.PlaceMonkey("Jebus", IDgenerator.GetMonkeyID());
+			Map m2 = new Map(0, 200, 0, 400);
+			Wood w2 = WoodBuilder.GetWood(20000, m2, path, db);
+			w2.PlaceMonkey("Tom", IDgenerator.GetMonkeyID());
+			w2.PlaceMonkey("Jerry", IDgenerator.GetMonkeyID());
+			w2.PlaceMonkey("Tiffany", IDgenerator.GetMonkeyID());
+			w2.PlaceMonkey("Mozes", IDgenerator.GetMonkeyID());
+			w2.PlaceMonkey("Jebus", IDgenerator.GetMonkeyID());
 
-			//Map m3 = new Map(0, 400, 0, 400);
-			//Wood w3 = WoodBuilder.GetWood(4, m3, path, db);
-			//w3.PlaceMonkey("Kelly", IDgenerator.GetMonkeyID());
-			//w3.PlaceMonkey("Kenji", IDgenerator.GetMonkeyID());
-			//w3.PlaceMonkey("Kobe", IDgenerator.GetMonkeyID());
-			//w3.PlaceMonkey("Kendra", IDgenerator.GetMonkeyID());
+			Map m3 = new Map(0, 400, 0, 400);
+			Wood w3 = WoodBuilder.GetWood(25000, m3, path, db);
+			w3.PlaceMonkey("Kelly", IDgenerator.GetMonkeyID());
+			w3.PlaceMonkey("Kenji", IDgenerator.GetMonkeyID());
+			w3.PlaceMonkey("Kobe", IDgenerator.GetMonkeyID());
+			w3.PlaceMonkey("Kendra", IDgenerator.GetMonkeyID());
 
 			tasks.Add(Task.Run(w1.WriteWoodToDB));
-			//tasks.Add(Task.Run(w2.WriteWoodToDB));
-			//tasks.Add(Task.Run(w3.WriteWoodToDB));
+			tasks.Add(Task.Run(w2.WriteWoodToDB));
+			tasks.Add(Task.Run(w3.WriteWoodToDB));
 
 
 			w1.Escape();
-			//w2.Escape();
-			//w3.Escape();
+			w2.Escape();
+			w3.Escape();
 
 			Task.WaitAll(tasks.ToArray());
 

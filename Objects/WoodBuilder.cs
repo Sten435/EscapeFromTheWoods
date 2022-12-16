@@ -4,12 +4,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace EscapeFromTheWoods
-{
-    public static class WoodBuilder
-    {        
-        public static Wood GetWood(int aantalTrees, Map map,string path, Repo db)
-        {
+namespace EscapeFromTheWoods {
+	public static class WoodBuilder {
+		public static Wood GetWood(int aantalTrees, Map map, string path, Repo db) {
+			bool maxAantalBomen = map.xmax * map.ymax < aantalTrees;
+			if (maxAantalBomen) {
+				Console.WriteLine($"Je kan maximum: {map.xmax * map.ymax} bomen hebben");
+			}
+
 			Random r = new Random(100);
 			Dictionary<(int, int), Tree> trees = new Dictionary<(int, int), Tree>();
 			int count = 0;
@@ -22,5 +24,5 @@ namespace EscapeFromTheWoods
 			Wood w = new Wood(IDgenerator.GetWoodID(), trees.Values.ToList(), map, path, db);
 			return w;
 		}
-    }
+	}
 }
